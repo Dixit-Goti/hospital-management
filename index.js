@@ -5,6 +5,9 @@ import errorHandler from './middlewares/error.js';
 import { successResponse } from './utils/response.js';
 import { ApiError } from './utils/error.js';
 
+import patientRoutes from './routes/patient.routes.js';
+import authRoutes from './routes/auth.routes.js';
+
 // Load environment variables
 dotenv.config();
 
@@ -15,6 +18,9 @@ const app = express();
 connectDB();
 
 app.use(express.json());
+
+app.use('/api/patients', patientRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

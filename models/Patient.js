@@ -2,7 +2,12 @@ import mongoose from 'mongoose';
 
 const patientSchema = new mongoose.Schema(
     {
-        name: {
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        lastName: {
             type: String,
             required: true,
             trim: true,
@@ -32,7 +37,7 @@ const patientSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        hashedPassword: {
+        password: {
             type: String,
             required: true,
         },
@@ -46,10 +51,9 @@ const patientSchema = new mongoose.Schema(
         },
     },
     {
-        timestamps: true, // adds createdAt and updatedAt automatically
+        timestamps: true,
     }
 );
 
-// Export model
 const Patient = mongoose.model('Patient', patientSchema);
 export default Patient;
