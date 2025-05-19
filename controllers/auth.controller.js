@@ -3,11 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { ApiError } from '../utils/error.js';
 import { successResponse, errorResponse } from '../utils/response.js';
+import Patient from '../models/Patient.js';
 
-/**
- * @desc    Login controller for doctors
- * @route   POST /api/auth/login
- */
 
 export const loginDoctor = async (req, res, next) => {
     try {
@@ -45,6 +42,46 @@ export const loginDoctor = async (req, res, next) => {
         );
 
         return successResponse(res, { token, user: { id: user._id, name: user.firstName, role: user.role } }, 'Doctor logged in successfully');
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const loginPatient = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        // Validate email and password
+        if (!email || !password) {
+            throw new ApiError("Email and password are required", 400);
+        }
+
+        // Find patient by email
+        const patient = await Patient.findOne({ email });
+        if (!patient) {
+            throw new ApiError("Invalid credentials", 401);
+        }
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, patient.password);
+        if (!isMatch) {
+            throw new ApiError("Invalid credentials", 401);
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            {
+                id: patient._id,
+                email: patient.email,
+                role: 'patient',
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        return successResponse(res, { token }, "Patient logged in successfully");
+
     } catch (err) {
         next(err);
     }

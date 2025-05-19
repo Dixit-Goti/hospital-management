@@ -1,18 +1,16 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { registerPatient } from '../controllers/patient.controller.js';
+import { registerPatient, updatePatient, softDeletePatient, getPatients } from '../controllers/patient.controller.js';
 import authenticate from '../middlewares/auth.js';
+import authorize from '../middlewares/authorize.js';
 
 const router = express.Router();
 
-/**
- * @route POST /api/patient/register
- * @desc  Register a new patient
- */
 
 router.post(
     '/register',
     authenticate,
+    authorize('doctor'),
     [
         body('firstName').notEmpty().withMessage('First name is required'),
         body('lastName').notEmpty().withMessage('Last name is required'),
@@ -24,5 +22,11 @@ router.post(
     ],
     registerPatient
 );
+
+router.get('/', authenticate, getPatients);
+
+router.put('/:id', authenticate, updatePatient);
+
+router.delete('/:id', authenticate, authorize('doctor'), softDeletePatient);
 
 export default router;

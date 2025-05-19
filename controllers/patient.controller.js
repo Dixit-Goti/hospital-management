@@ -8,6 +8,7 @@ import sendEmail from '../utils/sendEmail.js'; // using your original function
 import crypto from 'crypto';
 import { getWelcomeEmailHTML } from '../utils/emailTemplates/welcomeTemplate.js';
 
+
 export const registerPatient = async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -47,7 +48,8 @@ export const registerPatient = async (req, res, next) => {
             address,
             profileImage,
             password: hashedPassword,
-            joinDate: new Date()
+            joinDate: new Date(),
+            role: 'patient',
         });
 
         await newPatient.save();
@@ -66,3 +68,84 @@ export const registerPatient = async (req, res, next) => {
     }
 };
 
+
+export const getPatients = async (req, res, next) => {
+    try {
+        const user = req.user;
+
+        // Doctor can view all or specific patient by emial (via query param)
+        if (user.role === 'doctor') {
+            const { email } = req.query;
+
+            const filter = { isDeleted: false };
+            if (email) {
+                filter.email = email;
+            }
+
+            const patients = await Patient.find(filter).select('-password');
+            return successResponse(res, patients, 'Patient(s) fetched successfully');
+        }
+
+        // Patient can view only their own details
+        if (user.role === 'patient') {
+            const patient = await Patient.findOne({ _id: user.id, isDeleted: false });
+
+            if (!patient) {
+                throw new ApiError('Patient not found or deleted', 404);
+            }
+
+            return successResponse(res, patient, 'Your profile details');
+        }
+
+        // Unauthorized role
+        throw new ApiError('Unauthorized access', 403);
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const updatePatient = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Validate if patient exists and is not deleted
+        const patient = await Patient.findOne({ _id: id, isDeleted: false });
+        if (!patient) {
+            throw new ApiError('Patient not found or already deleted', 404);
+        }
+
+        // Update patient fields
+        Object.keys(updates).forEach(key => {
+            if (key in patient) {
+                patient[key] = updates[key];
+            }
+        });
+
+        await patient.save();
+
+        return successResponse(res, patient, 'Patient updated successfully');
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const softDeletePatient = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const patient = await Patient.findOne({ _id: id, isDeleted: false });
+        if (!patient) {
+            throw new ApiError('Patient not found or already deleted', 404);
+        }
+
+        patient.isDeleted = true;
+        await patient.save();
+
+        return successResponse(res, null, 'Patient record deleted (soft delete)');
+    } catch (err) {
+        next(err);
+    }
+};

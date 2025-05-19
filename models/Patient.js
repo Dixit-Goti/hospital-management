@@ -49,6 +49,16 @@ const patientSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        role: {
+            type: String,
+            enum: ['patient'],
+            default: 'patient',
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        }
+
     },
     {
         timestamps: true,
