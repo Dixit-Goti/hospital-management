@@ -1,6 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import { registerPatient, updatePatient, softDeletePatient, getPatients } from '../controllers/patient.controller.js';
+import { loginPatient } from '../controllers/auth.controller.js';
 import authenticate from '../middlewares/auth.js';
 import authorize from '../middlewares/authorize.js';
 
@@ -10,7 +11,7 @@ const router = express.Router();
 router.post(
     '/register',
     authenticate,
-    authorize('doctor'),
+    authorize(['doctor']),
     [
         body('firstName').notEmpty().withMessage('First name is required'),
         body('lastName').notEmpty().withMessage('Last name is required'),
@@ -27,6 +28,8 @@ router.get('/', authenticate, getPatients);
 
 router.put('/:id', authenticate, updatePatient);
 
-router.delete('/:id', authenticate, authorize('doctor'), softDeletePatient);
+router.delete('/:id', authenticate, authorize(['doctor']), softDeletePatient);
+
+router.post('/login', loginPatient);
 
 export default router;

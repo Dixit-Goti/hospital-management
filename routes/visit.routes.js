@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
     '/',
     authenticate,
-    authorize('doctor'),
+    authorize(['doctor']),
     [
         body('patientId').notEmpty().withMessage('Patient ID is required'),
         body('date').notEmpty().withMessage('Date of visit is required'),

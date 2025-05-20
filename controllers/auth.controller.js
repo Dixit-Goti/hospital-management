@@ -21,8 +21,6 @@ export const loginDoctor = async (req, res, next) => {
             throw new ApiError('Doctor with this email does not exist', 404);
         }
 
-        console.log(user.password)
-
         // Compare passwords
         const isMatch = await bcrypt.compare(password, user.password);
 

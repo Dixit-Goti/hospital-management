@@ -5,7 +5,7 @@ import { ApiError } from "../utils/error.js";
  * Usage: authorize('doctor') or authorize('doctor', 'admin')
  */
 
-const authorize = (...allowedRoles) => {
+const authorize = (allowedRoles) => {
     return (req, res, next) => {
         if (!req.user || !allowedRoles.includes(req.user.role)) {
             return next(new ApiError("Access denied: insufficient permissions", 403));

@@ -1,5 +1,6 @@
 // controllers/patient.controller.js
 import Patient from '../models/Patient.js';
+import User from '../models/User.js';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import { successResponse } from '../utils/response.js';
@@ -34,7 +35,8 @@ export const registerPatient = async (req, res, next) => {
         }
 
         // Generate password and hash it
-        const rawPassword = crypto.randomBytes(8).toString('hex');
+        const rawPassword = `${firstName}@1234`// crypto.randomBytes(8).toString('hex');
+        console.log(rawPassword);
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
         // Create patient document
@@ -73,7 +75,7 @@ export const getPatients = async (req, res, next) => {
     try {
         const user = req.user;
 
-        // Doctor can view all or specific patient by emial (via query param)
+        // Doctor can view all or specific patient by email (via query param)
         if (user.role === 'doctor') {
             const { email } = req.query;
 
@@ -149,3 +151,20 @@ export const softDeletePatient = async (req, res, next) => {
         next(err);
     }
 };
+
+// async function addDoctor() {
+//     const newUSer = new User({
+//         firstName: "John",
+//         lastName: "Doe",
+//         email: "doctor@example.com",
+//         password: "$2b$10$ri62/Bo0VIZq8ioKlwKAtOxgkUXe12vbGkB7dj.aSUjK7QvhvrGyK",
+//         mobileNo: 9876543210,
+//         gender: "male",
+//         address: "123 Clinic Street, Cityville",
+//         role: "doctor"
+//     });
+
+//     await newUSer.save();
+// }
+
+// // addDoctor()

@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
     '/add',
     authenticate,
-    authorize('doctor'),
+    authorize(['doctor']),
     [
         body('name').notEmpty().withMessage('Medicine name is required'),
         body('strength').notEmpty().withMessage('Strength is required'),
@@ -21,14 +21,14 @@ router.post(
 
 
 // Get all the medicined
-router.get('/', authenticate, authorize('doctor'), getAllMedicines);
+router.get('/', authenticate, authorize(['doctor']), getAllMedicines);
 
 
 // Update Medicine
 router.put(
     '/:id',
     authenticate,
-    authorize('doctor'),
+    authorize(['doctor']),
     [
         body('name').optional().notEmpty().withMessage('Name cannot be empty'),
         body('strength').optional().notEmpty().withMessage('Strength cannot be empty'),
@@ -39,7 +39,7 @@ router.put(
 
 
 // Delete Medicine
-router.delete('/:id', authenticate, authorize('doctor'), deleteMedicine);
+router.delete('/:id', authenticate, authorize(['doctor']), deleteMedicine);
 
 
 export default router;
