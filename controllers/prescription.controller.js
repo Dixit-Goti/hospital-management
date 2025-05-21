@@ -30,49 +30,102 @@ export const addPrescription = async (req, res, next) => {
 export const getPrescriptions = async (req, res, next) => {
     try {
         const user = req.user;
-
         let prescriptions;
 
-        // Doctor: all or filter by patient email
-        if (user.role === 'docotr') {
+        if (user.role === 'doctor') {
             const { email } = req.query;
 
             if (email) {
-                const patient = await Patient.findOne({ email });
+                const patient = await Patient.findOne({ email }).lean();
                 if (!patient) {
                     throw new ApiError('Patient not found with this email', 404);
                 }
 
-                prescriptions = await Prescription.find()
-                    .populate({
-                        path: 'visitId',
-                        match: { patientId: patient._id }
-                    })
-                    .populate('visitId')
-                    .lean();
-
-                // Filter out prescriptions where visitId was not matched
-                prescriptions = prescriptions.filter(p => p.visitId);
+                // Use aggregation to filter prescriptions by patientId in Visit
+                prescriptions = await Prescription.aggregate([
+                    {
+                        $lookup: {
+                            from: 'visits', // The name of the Visit collection in MongoDB
+                            localField: 'visitId',
+                            foreignField: '_id',
+                            as: 'visit'
+                        }
+                    },
+                    {
+                        $unwind: '$visit'
+                    },
+                    {
+                        $match: {
+                            'visit.patientId': patient._id
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'visits',
+                            localField: 'visitId',
+                            foreignField: '_id',
+                            as: 'visitId'
+                        }
+                    },
+                    {
+                        $unwind: '$visitId'
+                    },
+                    {
+                        $project: {
+                            visitId: 1,
+                            listOfMedicine: 1,
+                            instructions: 1,
+                            createdAt: 1,
+                            updatedAt: 1
+                        }
+                    }
+                ]).exec();
             } else {
+                // Fetch all prescriptions with populated visitId
                 prescriptions = await Prescription.find()
                     .populate('visitId')
                     .lean();
             }
-        }
-        // Patient: only own prescriptions
-        else if (user.role === 'patient') {
-            const prescriptionsAll = await Prescription.find()
-                .populate({
-                    path: 'visitId',
-                    match: { patientId: user._id }
-                })
-                .populate('visitId')
-                .lean();
-
-            prescriptions = prescriptionsAll.filter(p => p.visitId);
-        }
-
-        else {
+        } else if (user.role === 'patient') {
+            prescriptions = await Prescription.aggregate([
+                {
+                    $lookup: {
+                        from: 'visits',
+                        localField: 'visitId',
+                        foreignField: '_id',
+                        as: 'visit'
+                    }
+                },
+                {
+                    $unwind: '$visit'
+                },
+                {
+                    $match: {
+                        'visit.patientId': user._id
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'visits',
+                        localField: 'visitId',
+                        foreignField: '_id',
+                        as: 'visitId'
+                    }
+                },
+                {
+                    $unwind: '$visitId'
+                },
+                {
+                    $project: {
+                        visitId: 1,
+                        listOfMedicine: 1,
+                        instructions: 1,
+                        createdAt: 1,
+                        updatedAt: 1
+                    }
+                }
+            ]).exec();
+        } else {
             throw new ApiError('Unauthorized access', 403);
         }
 

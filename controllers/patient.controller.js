@@ -36,7 +36,6 @@ export const registerPatient = async (req, res, next) => {
 
         // Generate password and hash it
         const rawPassword = `${firstName}@1234`// crypto.randomBytes(8).toString('hex');
-        console.log(rawPassword);
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
         // Create patient document

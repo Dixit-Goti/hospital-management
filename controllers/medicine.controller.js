@@ -24,7 +24,7 @@ export const addMedicine = async (req, res, next) => {
 
         return successResponse(res, medicine, 'Medicine added successfully', 201);
 
-    } catch (error) {
+    } catch (err) {
         next(err);
     }
 };
@@ -43,24 +43,24 @@ export const getAllMedicines = async (req, res, next) => {
 
 export const updateMedicine = async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            throw new ApiError(errors.array()[0].msg, 400);
+        const { id } = req.params;
+        const updates = req.body;
+
+        const medicine = await Medicine.findOne({ _id: id });
+        if (!medicine) {
+            console.log("Here")
+            throw new ApiError('Medicine not found or already deleted', 404);
         }
 
-        const medicineId = req.params.id;
-        const updateData = req.body;
-
-        const updated = await Medicine.findByIdAndUpdate(medicineId, updateData, {
-            new: true,
-            runValidators: true,
+        Object.keys(updates).forEach(key => {
+            if (key in medicine) {
+                medicine[key] = updates[key];
+            }
         });
 
-        if (!updated) {
-            throw new ApiError('Medicine not found', 404);
-        }
+        await medicine.save();
 
-        return successResponse(res, updated, 'Medicine updated successfully');
+        return successResponse(res, medicine, 'Medicine updated successfully');
 
     } catch (err) {
         next(err);
@@ -75,11 +75,11 @@ export const deleteMedicine = async (req, res, next) => {
         const deleted = await Medicine.findByIdAndDelete(medicineId);
 
         if (!deleted) {
-            throw new ApiError('Medicine not found', 404);
+            throw new ApiError('Medicine not found or already deleted', 404);
         }
 
         return successResponse(res, null, "Medicine deleted successfully");
-    } catch {
+    } catch (err) {
         next(err);
     }
 };

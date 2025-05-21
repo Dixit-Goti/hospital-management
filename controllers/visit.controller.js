@@ -1,5 +1,6 @@
 import { validationResult } from 'express-validator';
 import Visit from '../models/Visit.js';
+import Patient from '../models/Patient.js';
 import { ApiError } from '../utils/error.js';
 import { successResponse } from '../utils/response.js';
 
@@ -22,7 +23,7 @@ export const addVisit = async (req, res, next) => {
             followUpNotes,
         } = req.body;
 
-        const doctorId = req.user._id;
+        const doctorId = req.user.id;
 
         const visit = new Visit({
             patientId,
@@ -45,46 +46,42 @@ export const addVisit = async (req, res, next) => {
 };
 
 
-export const getAllVisits = async (req, res, next) => {
+export const getVisits = async (req, res, next) => {
     try {
-        // Only doctors can view all visits
-        if (req.user.role !== 'doctor') {
-            throw new ApiError('Unauthorized access', 403);
+        const user = req.user;
+        const { email } = req.query;
+
+        // Doctor can view all visits or visits for a specific patient by email
+        if (user.role === 'doctor') {
+            let filter = { isDeleted: false };
+
+            if (email) {
+                // Find patient by email first
+                const patient = await Patient.findOne({ email, isDeleted: false });
+                if (!patient) {
+                    return successResponse(res, [], 'No visits found for this email');
+                }
+                filter.patientId = patient._id;
+            }
+
+            const visits = await Visit.find(filter)
+                .populate('patientId', 'firstName lastName email')
+                .populate('doctorId', 'firstName lastName email');
+
+            return successResponse(res, visits, 'Visit(s) fetched successfully');
         }
 
-        const visits = await Visit.find({ isDeleted: false })
-            .populate('patientId', 'firstName lastName email')
-            .populate('doctorId', 'firstName lastName email');
+        // Patient can view only their own visits
+        if (user.role === 'patient') {
+            const visits = await Visit.find({ patientId: user.id, isDeleted: false })
+                .populate('patientId', 'firstName lastName email')
+                .populate('doctorId', 'firstName lastName email');
 
-
-        return successResponse(res, visits, 'All visits fetched successfully');
-    } catch (err) {
-        next(err);
-    }
-};
-
-
-export const getVisitsByPatient = async (req, res, next) => {
-    try {
-        const { patientId } = req.params;
-
-        // Only the doctor or the patient themselves can view the data
-        if (
-            req.user.role !== 'doctor' &&
-            req.user.role !== 'patient'
-        ) {
-            throw new ApiError('Unauthorized access', 403);
+            return successResponse(res, visits, 'Your visits fetched successfully');
         }
 
-        if (req.user.role === 'patient' && req.user._id.toString() !== patientId) {
-            throw new ApiError('You are not allowed to access other patient records', 403);
-        }
-
-        const visits = await Visit.find({ patientId, isDeleted: false })
-            .populate('patientId', 'firstName lastName email')
-            .populate('doctorId', 'firstName lastName email');
-
-        return successResponse(res, visits, 'Patient visits fetched successfully');
+        // Unauthorized role
+        throw new ApiError('Unauthorized access', 403);
     } catch (err) {
         next(err);
     }

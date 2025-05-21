@@ -8,6 +8,8 @@ import authorize from '../middlewares/authorize.js';
 const router = express.Router();
 
 
+router.post('/login', loginPatient); // ✅ move to top
+
 router.post(
     '/register',
     authenticate,
@@ -26,10 +28,8 @@ router.post(
 
 router.get('/', authenticate, getPatients);
 
-router.put('/:id', authenticate, updatePatient);
-
+router.put('/:id', authenticate, authorize(['doctor']), updatePatient);
 router.delete('/:id', authenticate, authorize(['doctor']), softDeletePatient);
 
-router.post('/login', loginPatient);
 
 export default router;

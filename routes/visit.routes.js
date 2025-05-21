@@ -2,13 +2,13 @@ import express from 'express';
 import { body } from 'express-validator';
 import authenticate from '../middlewares/auth.js';
 import authorize from '../middlewares/authorize.js';
-import { addVisit, getAllVisits, getVisitsByPatient, updateVisit, softDeleteVisit } from '../controllers/visit.controller.js';
+import { addVisit, getVisits, updateVisit, softDeleteVisit } from '../controllers/visit.controller.js';
 
 const router = express.Router();
 
 // Add a new patient visit
 router.post(
-    '/',
+    '/add',
     authenticate,
     authorize(['doctor']),
     [
@@ -20,9 +20,8 @@ router.post(
 );
 
 
-router.get('/', authenticate, getAllVisits);
+router.get('/', authenticate, getVisits);
 
-router.get('/patient/:patientId', authenticate, getVisitsByPatient);
 
 router.put('/:id', authenticate, updateVisit);
 

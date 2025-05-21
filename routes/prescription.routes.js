@@ -8,7 +8,7 @@ const router = express.Router();
 
 // POST /api/prescriptions
 router.post(
-    '/',
+    '/add',
     authenticate,
     authorize(['doctor']),
     [
