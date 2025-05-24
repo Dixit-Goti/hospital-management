@@ -1,5 +1,6 @@
 import Patient from "../models/Patient.js";
 import Prescription from "../models/Prescription.js";
+import Medicine from "../models/Medicine.js";
 import { ApiError } from "../utils/error.js";
 import { successResponse } from "../utils/response.js";
 
@@ -41,18 +42,20 @@ export const getPrescriptions = async (req, res, next) => {
                     throw new ApiError('Patient not found with this email', 404);
                 }
 
-                // Use aggregation to filter prescriptions by patientId in Visit
                 prescriptions = await Prescription.aggregate([
                     {
                         $lookup: {
-                            from: 'visits', // The name of the Visit collection in MongoDB
+                            from: 'Visit', // Correct collection name for visits
                             localField: 'visitId',
                             foreignField: '_id',
                             as: 'visit'
                         }
                     },
                     {
-                        $unwind: '$visit'
+                        $unwind: {
+                            path: '$visit',
+                            preserveNullAndEmptyArrays: true
+                        }
                     },
                     {
                         $match: {
@@ -61,19 +64,43 @@ export const getPrescriptions = async (req, res, next) => {
                     },
                     {
                         $lookup: {
-                            from: 'visits',
-                            localField: 'visitId',
+                            from: 'Medicine', // Correct collection name for medicines
+                            localField: 'listOfMedicine.medicineId',
                             foreignField: '_id',
-                            as: 'visitId'
+                            as: 'medicineDetails'
                         }
                     },
                     {
-                        $unwind: '$visitId'
-                    },
-                    {
                         $project: {
-                            visitId: 1,
-                            listOfMedicine: 1,
+                            visitId: '$visit',
+                            listOfMedicine: {
+                                $map: {
+                                    input: '$listOfMedicine',
+                                    as: 'med',
+                                    in: {
+                                        medicineId: '$$med.medicineId',
+                                        name: {
+                                            $let: {
+                                                vars: {
+                                                    matchedMedicine: {
+                                                        $arrayElemAt: [
+                                                            '$medicineDetails',
+                                                            {
+                                                                $indexOfArray: ['$medicineDetails._id', '$$med.medicineId']
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                in: { $ifNull: ['$$matchedMedicine.name', 'Unknown Medicine'] }
+                                            }
+                                        },
+                                        dosage: '$$med.dosage',
+                                        frequency: '$$med.frequency',
+                                        duration: '$$med.duration',
+                                        instructions: '$$med.instructions',
+                                    }
+                                }
+                            },
                             instructions: 1,
                             createdAt: 1,
                             updatedAt: 1
@@ -81,23 +108,37 @@ export const getPrescriptions = async (req, res, next) => {
                     }
                 ]).exec();
             } else {
-                // Fetch all prescriptions with populated visitId
                 prescriptions = await Prescription.find()
                     .populate('visitId')
-                    .lean();
+                    .lean()
+                    .then(async (docs) => {
+                        return await Promise.all(docs.map(async (prescription) => {
+                            const medicines = await Medicine.find({
+                                '_id': { $in: prescription.listOfMedicine.map(m => m.medicineId) }
+                            }).lean();
+                            prescription.listOfMedicine = prescription.listOfMedicine.map(med => ({
+                                ...med,
+                                name: medicines.find(m => m._id.toString() === med.medicineId.toString())?.name || 'Unknown Medicine'
+                            }));
+                            return prescription;
+                        }));
+                    });
             }
         } else if (user.role === 'patient') {
             prescriptions = await Prescription.aggregate([
                 {
                     $lookup: {
-                        from: 'visits',
+                        from: 'Visit', // Correct collection name for visits
                         localField: 'visitId',
                         foreignField: '_id',
                         as: 'visit'
                     }
                 },
                 {
-                    $unwind: '$visit'
+                    $unwind: {
+                        path: '$visit',
+                        preserveNullAndEmptyArrays: true
+                    }
                 },
                 {
                     $match: {
@@ -106,19 +147,44 @@ export const getPrescriptions = async (req, res, next) => {
                 },
                 {
                     $lookup: {
-                        from: 'visits',
-                        localField: 'visitId',
+                        from: 'Medicine', // Correct collection name for medicines
+                        localField: 'listOfMedicine.medicineId',
                         foreignField: '_id',
-                        as: 'visitId'
+                        as: 'medicineDetails'
                     }
                 },
                 {
-                    $unwind: '$visitId'
-                },
-                {
                     $project: {
-                        visitId: 1,
-                        listOfMedicine: 1,
+                        visitId: '$visit',
+                        listOfMedicine: {
+                            $map: {
+                                input: '$listOfMedicine',
+                                as: 'med',
+                                in: {
+                                    medicineId: '$$med.medicineId',
+                                    name: {
+                                        $let: {
+                                            vars: {
+                                                matchedMedicine: {
+                                                    $arrayElemAt: [
+                                                        '$medicineDetails',
+                                                        {
+                                                            $indexOfArray: ['$medicineDetails._id', '$$med.medicineId']
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            in: { $ifNull: ['$$matchedMedicine.name', 'Unknown Medicine'] }
+                                        }
+                                    },
+                                    dosage: '$$med.dosage',
+                                    frequency: '$$med.frequency',
+                                    duration: '$$med.duration',
+                                    instructions: '$$med.instructions',
+
+                                }
+                            }
+                        },
                         instructions: 1,
                         createdAt: 1,
                         updatedAt: 1
