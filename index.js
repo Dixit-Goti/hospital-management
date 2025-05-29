@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import winston from "winston";
 import connectDB from "./config/db.js";
@@ -29,8 +30,8 @@ const app = express();
 // Security middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Restrict to your frontend URL
-    credentials: true,
+    origin: '*',
+    credentials: true, // If using cookies/auth
   })
 );
 app.use(express.json());
