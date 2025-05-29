@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import winston from "winston";
 import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/error.js";
@@ -29,6 +28,7 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+app.use(cors({ origin: "*" })); // Allow all origins
 app.use(express.json());
 
 // Root route for health check
@@ -47,7 +47,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 443; // Default to 443 for Render.com
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
