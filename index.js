@@ -1,8 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import winston from "winston";
 import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/error.js";
@@ -28,12 +26,7 @@ dotenv.config();
 const app = express();
 
 // Security middleware
-app.use(
-  cors({
-    origin: '*',
-    credentials: true, // If using cookies/auth
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 // Root route for health check
