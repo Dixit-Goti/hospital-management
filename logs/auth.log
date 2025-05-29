@@ -1,0 +1,46 @@
+{"level":"warn","message":"Authentication failed: Missing or malformed Authorization header - ::1","timestamp":"2025-05-27T07:02:03.911Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:02:22.973Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:03:38.564Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:04:07.287Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:04:09.960Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:06:15.723Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:08:43.661Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:10:45.458Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:11:14.354Z"}
+{"level":"warn","message":"Unauthorized access attempt by doctor@example.com (role: doctor) - ::1","timestamp":"2025-05-27T07:11:14.354Z"}
+{"level":"info","message":"Authenticated user: john.doe@example.com (patient) - ::1","timestamp":"2025-05-27T07:11:41.280Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:17:43.732Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:33:27.108Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-27T07:34:35.651Z"}
+{"level":"warn","message":"Authentication failed: Missing or malformed Authorization header - ::1","timestamp":"2025-05-27T07:39:35.327Z"}
+{"level":"info","message":"Authenticated user: john.doe@example.com (patient) - ::1","timestamp":"2025-05-27T07:40:34.184Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:41:43.692Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:41:47.996Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:44:37.743Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:48:33.241Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:50:15.871Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:50:18.755Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:52:15.309Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:52:26.845Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:52:38.205Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:52:48.454Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:52:51.334Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:54:11.685Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T05:54:28.451Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:00:43.795Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:00:53.289Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:01:01.867Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:04:55.079Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:05:01.134Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:44:19.538Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:44:56.199Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:45:54.850Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:50:28.690Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:51:48.586Z"}
+{"level":"info","message":"Authenticated user: john.doe@example.com (patient) - ::1","timestamp":"2025-05-29T06:52:12.353Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:52:46.093Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:53:23.214Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:57:07.565Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T06:57:11.579Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T07:02:08.125Z"}
+{"level":"info","message":"Authenticated user: doctor@example.com (doctor) - ::1","timestamp":"2025-05-29T07:02:15.694Z"}

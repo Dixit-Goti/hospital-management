@@ -1,53 +1,115 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import validator from "validator";
+import Patient from "./Patient.js";
+import Medicine from "./Medicine.js";
+import { ApiError } from "../utils/error.js";
 
-const medicineItemSchema = new mongoose.Schema({
+const medicineItemSchema = new mongoose.Schema(
+  {
     medicineId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Medicine',
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Medicine",
+      required: true,
     },
     dosage: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
+      minLength: [1, "Dosage must be at least 1 character"],
     },
     frequency: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
+      minLength: [1, "Frequency must be at least 1 character"],
     },
     duration: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
+      minLength: [1, "Duration must be at least 1 character"],
     },
     instructions: {
-        type: String,
-        trim: true,
+      type: String,
+      trim: true,
     },
-}, { _id: false });
-
-const prescriptionSchema = new mongoose.Schema(
-    {
-        visitId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Visit',
-            required: true,
-        },
-        listOfMedicine: {
-            type: [medicineItemSchema],
-            default: [],
-        },
-        instructions: {
-            type: String,
-            trim: true,
-        },
-    },
-    {
-        timestamps: true,
-    }
+  },
+  { _id: false }
 );
 
-// Export model
-const Prescription = mongoose.model('Prescription', prescriptionSchema);
+const prescriptionSchema = new mongoose.Schema(
+  {
+    patientEmail: {
+      type: String,
+      required: [true, "Patient email is required"],
+      trim: true,
+      lowercase: true,
+      validate: {
+        validator: (email) => validator.isEmail(email),
+        message: "Invalid patient email format",
+      },
+    },
+    listOfMedicine: {
+      type: [medicineItemSchema],
+      default: [],
+    },
+    instructions: {
+      type: String,
+      trim: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Index for faster queries by patientEmail
+prescriptionSchema.index({ patientEmail: 1 });
+
+// Pre-save hook to validate patientEmail and medicineIds
+prescriptionSchema.pre("save", async function (next) {
+  try {
+    // Validate patientEmail exists in Patient collection
+    const patient = await Patient.findOne({
+      email: this.patientEmail,
+      isDeleted: false,
+    });
+    if (!patient) {
+      throw ApiError.BadRequest(
+        "Patient with this email does not exist or is deleted",
+        "PATIENT_NOT_FOUND"
+      );
+    }
+
+    // Validate all medicineIds
+    const medicineIds = this.listOfMedicine.map((item) => item.medicineId);
+    if (medicineIds.length > 0) {
+      const medicines = await Medicine.find({
+        _id: { $in: medicineIds },
+        isDeleted: false,
+      });
+      if (medicines.length !== medicineIds.length) {
+        throw ApiError.BadRequest(
+          "One or more medicines not found or deleted",
+          "MEDICINE_NOT_FOUND"
+        );
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Pre-find hook to exclude deleted prescriptions
+prescriptionSchema.pre(/^find/, function (next) {
+  this.where({ isDeleted: false });
+  next();
+});
+
+const Prescription = mongoose.model("Prescription", prescriptionSchema);
 export default Prescription;
