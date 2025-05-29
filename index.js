@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import winston from "winston";
 import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/error.js";
@@ -37,13 +36,6 @@ app.use(
 );
 app.use(express.json());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
-});
-app.use(limiter);
-
 // Root route for health check
 app.get("/", (req, res) => res.send("API is running..."));
 
@@ -60,7 +52,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 443; // Default to 443 for Render.com
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
