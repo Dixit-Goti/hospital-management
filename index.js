@@ -26,10 +26,36 @@ const logger = winston.createLogger({
 dotenv.config();
 const app = express();
 
-// Security middleware
-app.use(helmet());
-app.use(cors({ origin: "*" })); // Allow all origins
+// Trust Render.com's proxy
+app.set("trust proxy", 1);
+
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL, // e.g., https://your-frontend.com
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Support credentials: 'include'
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Handle CORS preflight
+app.options("*", cors());
+
+// Middleware
 app.use(express.json());
+app.use(helmet());
 
 // Root route for health check
 app.get("/", (req, res) => res.send("API is running..."));
