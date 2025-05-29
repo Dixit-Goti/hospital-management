@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import winston from "winston";
 import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/error.js";
@@ -26,36 +26,14 @@ const logger = winston.createLogger({
 dotenv.config();
 const app = express();
 
-// Trust Render.com's proxy
-app.set("trust proxy", 1);
-
-// CORS configuration
-const allowedOrigins = [
-  "http://localhost:3000",
-  process.env.FRONTEND_URL, // e.g., https://your-frontend.com
-].filter(Boolean);
-
+// Security middleware
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // Support credentials: 'include'
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Restrict to your frontend URL
+    credentials: true,
   })
 );
-
-// Handle CORS preflight
-app.options("*", cors());
-
-// Middleware
 app.use(express.json());
-app.use(helmet());
 
 // Root route for health check
 app.get("/", (req, res) => res.send("API is running..."));
@@ -73,7 +51,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
-    const PORT = process.env.PORT || 443; // Default to 443 for Render.com
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
