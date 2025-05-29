@@ -26,14 +26,31 @@ const logger = winston.createLogger({
 dotenv.config();
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL, // Set in Render.com
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Restrict to your frontend URL
-    credentials: true, // If using cookies/auth
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Handle CORS preflight
+app.options("*", cors());
+
+app.use(helmet());
 app.use(express.json());
 
 // Root route for health check
