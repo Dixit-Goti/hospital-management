@@ -25,16 +25,8 @@ export const registerPatient = async (req, res, next) => {
       throw ApiError.BadRequest(errors.array()[0].msg, "VALIDATION_ERROR");
     }
 
-    const {
-      firstName,
-      lastName,
-      email,
-      mobile,
-      dob,
-      gender,
-      address,
-      profileImage,
-    } = req.body;
+    const { firstName, lastName, email, mobile, dob, gender, address } =
+      req.body;
 
     // Check if patient already exists
     const existing = await Patient.findOne({ email });
@@ -44,6 +36,12 @@ export const registerPatient = async (req, res, next) => {
         "EMAIL_EXISTS",
         { email }
       );
+    }
+
+    // Handle profile image
+    let profileImage = null;
+    if (req.file) {
+      profileImage = req.file.path; // Save the file path
     }
 
     // Generate and hash password
@@ -144,6 +142,11 @@ export const updatePatient = async (req, res, next) => {
       }
     }
 
+    // Handle profile image
+    if (req.file) {
+      updates.profileImage = req.file.path; // Update with new file path
+    }
+
     // Update fields
     const allowedFields = [
       "firstName",
@@ -236,20 +239,3 @@ export const changePatientPassword = async (req, res, next) => {
     next(err);
   }
 };
-
-// async function addDoctor() {
-//     const newUSer = new User({
-//         firstName: "John",
-//         lastName: "Doe",
-//         email: "doctor@example.com",
-//         password: "Doctor@1234",
-//         mobileNo: 9876543210,
-//         gender: "male",
-//         address: "123 Clinic Street, Cityville",
-//         role: "doctor"
-//     });
-
-//     await newUSer.save();
-// }
-
-// addDoctor()

@@ -10,6 +10,34 @@ import {
 } from "../controllers/patient.controller.js";
 import authenticate from "../middlewares/auth.js";
 import authorize from "../middlewares/authorize.js";
+import multer from "multer";
+import path from "path";
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/patients/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype = filetypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error("Only JPEG/PNG images are allowed"));
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
 
 const router = express.Router();
 
@@ -22,6 +50,7 @@ router.post(
   "/register",
   authenticate,
   authorize(["doctor"]),
+  upload.single("profileImage"), // Handle single file upload for profileImage
   [
     body("firstName").notEmpty().withMessage("First name is required"),
     body("lastName").notEmpty().withMessage("Last name is required"),
@@ -39,10 +68,6 @@ router.post(
       .optional()
       .notEmpty()
       .withMessage("Address is required if provided"),
-    body("profileImage")
-      .optional()
-      .isURL()
-      .withMessage("Profile image must be a valid URL if provided"),
   ],
   registerPatient
 );
@@ -70,6 +95,7 @@ router.put(
   "/:id",
   authenticate,
   authorize(["doctor"]),
+  upload.single("profileImage"), // Handle single file upload for profileImage
   [
     body("firstName")
       .optional()
@@ -99,10 +125,6 @@ router.put(
       .optional()
       .notEmpty()
       .withMessage("Address is required if provided"),
-    body("profileImage")
-      .optional()
-      .isURL()
-      .withMessage("Profile image must be a valid URL if provided"),
   ],
   updatePatient
 );

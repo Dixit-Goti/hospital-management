@@ -24,7 +24,7 @@ export const successResponse = (
 /**
  * Sends a standardized error response
  * @param {Object} res - Express response object
- * @param {string|ApiError} [error="An error occurred"] - Error message or ApiError instance
+ * @param {string|ApiError|Object} [error="An error occurred"] - Error message, ApiError instance, or validation errors
  * @param {number} [statusCode=500] - HTTP status code
  * @returns {Object} JSON response
  */
@@ -33,13 +33,33 @@ export const errorResponse = (
   error = "An error occurred",
   statusCode = 500
 ) => {
+  // Handle express-validator errors
+  if (error.array && typeof error.array === "function") {
+    return res.status(400).json({
+      success: false,
+      error: "Validation failed",
+      details: error.array().map((err) => ({
+        field: err.param,
+        message: err.msg,
+      })),
+    });
+  }
+
+  // Handle ApiError instances
+  if (error instanceof ApiError) {
+    const response = {
+      success: false,
+      error: error.message,
+      ...(error.errorCode && { errorCode: error.errorCode }),
+      ...(error.details && { details: error.details }),
+    };
+    return res.status(error.statusCode).json(response);
+  }
+
+  // Handle other errors (e.g., MongoDB duplication errors)
   const response = {
     success: false,
-    error: error instanceof ApiError ? error.message : error,
-    ...(error instanceof ApiError &&
-      error.errorCode && { errorCode: error.errorCode }),
-    ...(error instanceof ApiError &&
-      error.details && { details: error.details }),
+    error: error.message || error,
   };
   return res.status(statusCode).json(response);
 };
