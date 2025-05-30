@@ -1,20 +1,6 @@
 import nodemailer from "nodemailer";
 import validator from "validator";
-import winston from "winston";
 import { ApiError } from "./error.js";
-
-// Initialize logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/email.log" }),
-  ],
-});
 
 // Initialize transporter once
 const transporter = nodemailer.createTransport({
@@ -57,10 +43,10 @@ const sendEmail = async (to, subject, html) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.info(`Email sent to ${to}: ${info.response}`);
+    console.log(`Email sent to ${to}: ${info.response}`);
     return true;
   } catch (err) {
-    logger.error(`Error sending email to ${to}: ${err.message}`);
+    console.log(`Error sending email to ${to}: ${err.message}`);
     throw new ApiError(
       "Failed to send email",
       500,

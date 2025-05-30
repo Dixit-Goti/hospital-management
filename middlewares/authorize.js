@@ -1,18 +1,4 @@
 import { ApiError } from "../utils/error.js";
-import winston from "winston";
-
-// Initialize logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/auth.log" }),
-  ],
-});
 
 /**
  * Middleware to restrict access based on user roles.
@@ -23,7 +9,7 @@ const authorize = (allowedRoles) => {
   return (req, res, next) => {
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
     if (!req.user || !roles.includes(req.user.role)) {
-      logger.warn(
+      console.log(
         `Unauthorized access attempt by ${
           req.user?.email || "unknown"
         } (role: ${req.user?.role || "none"}) - ${req.ip}`

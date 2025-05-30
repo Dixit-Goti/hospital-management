@@ -1,18 +1,5 @@
 import mongoose from "mongoose";
-import winston from "winston";
 
-// Initialize logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/db.log" }),
-  ],
-});
 
 const connectDB = async () => {
   try {
@@ -23,17 +10,17 @@ const connectDB = async () => {
     };
 
     await mongoose.connect(process.env.MONGO_URI, options);
-    logger.info(`MongoDB Connected: ${mongoose.connection.host}`);
+    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
 
     // Handle connection events
     mongoose.connection.on("disconnected", () => {
-      logger.warn("MongoDB disconnected. Attempting to reconnect...");
+      console.log("MongoDB disconnected. Attempting to reconnect...");
     });
     mongoose.connection.on("reconnected", () => {
-      logger.info("MongoDB reconnected");
+      console.log("MongoDB reconnected");
     });
   } catch (error) {
-    logger.error(`MongoDB connection error: ${error.message}`);
+    console.log(`MongoDB connection error: ${error.message}`);
     // Optionally retry connection or notify (don't exit in production)
     setTimeout(connectDB, 5000); // Retry after 5 seconds
   }

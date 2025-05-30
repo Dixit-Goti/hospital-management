@@ -1,28 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import winston from "winston";
 import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/error.js";
 import authRoutes from "./routes/auth.routes.js";
 import patientRoutes from "./routes/patient.routes.js";
 import medicineRoutes from "./routes/medicine.routes.js";
 import prescriptionRoutes from "./routes/prescription.routes.js";
-
-// Initialize logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/app.log" }),
-  ],
-});
 
 dotenv.config();
 const app = express();
@@ -54,10 +38,10 @@ const startServer = async () => {
     await connectDB();
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    logger.error(`Failed to start server: ${error.message}`);
+    console.log(`Failed to start server: ${error.message}`);
     process.exit(1);
   }
 };

@@ -1,19 +1,5 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/error.js";
-import winston from "winston";
-
-// Initialize logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/auth.log" }),
-  ],
-});
 
 /**
  * Middleware to authenticate incoming requests using JWT.
@@ -25,7 +11,7 @@ const authenticate = (req, res, next) => {
 
   // Check if Authorization header is present and starts with Bearer
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
-    logger.warn(
+    console.log(
       `Authentication failed: Missing or malformed Authorization header - ${req.ip}`
     );
     return next(
@@ -41,14 +27,14 @@ const authenticate = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Attach user info (id, email, role)
-    logger.info(
+    console.log(
       `Authenticated user: ${decoded.email} (${decoded.role}) - ${req.ip}`
     );
     next();
   } catch (err) {
     const errorMessage =
       err.name === "TokenExpiredError" ? "Token has expired" : "Invalid token";
-    logger.warn(`Authentication failed: ${errorMessage} - ${req.ip}`);
+    console.log(`Authentication failed: ${errorMessage} - ${req.ip}`);
     return next(
       ApiError.Unauthorized(
         errorMessage,
