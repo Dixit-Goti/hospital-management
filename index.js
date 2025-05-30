@@ -7,6 +7,8 @@ import authRoutes from "./routes/auth.routes.js";
 import patientRoutes from "./routes/patient.routes.js";
 import medicineRoutes from "./routes/medicine.routes.js";
 import prescriptionRoutes from "./routes/prescription.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 const app = express();
