@@ -52,7 +52,7 @@ export const getPrescriptions = async (req, res, next) => {
       throw ApiError.BadRequest(errors.array()[0].msg, "VALIDATION_ERROR");
     }
 
-    const { email } = req.query;
+    const { patientEmail } = req.query;
     const user = req.user;
 
     const query = { isDeleted: false };
@@ -63,11 +63,10 @@ export const getPrescriptions = async (req, res, next) => {
       if (!patient) {
         throw ApiError.NotFound("Patient not found", "PATIENT_NOT_FOUND");
       }
-      query.email = patient.email;
-    } else if (email) {
-      query.email = email.toLowerCase();
+      query.patientEmail = patient.email;
+    } else if (patientEmail) {
+      query.patientEmail = patientEmail.toLowerCase();
     }
-
     const prescriptions = await Prescription.find(query)
       .select("-__v")
       .populate("listOfMedicine.medicineId", "name strength form");
