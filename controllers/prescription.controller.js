@@ -52,7 +52,7 @@ export const getPrescriptions = async (req, res, next) => {
       throw ApiError.BadRequest(errors.array()[0].msg, "VALIDATION_ERROR");
     }
 
-    const { patientEmail } = req.query;
+    const { patientEmail } = req.query.email;
     const user = req.user;
 
     const query = { isDeleted: false };
