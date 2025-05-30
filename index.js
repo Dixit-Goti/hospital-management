@@ -28,26 +28,7 @@ dotenv.config();
 const app = express();
 
 // Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        connectSrc: [
-          "'self'",
-          "http://127.0.0.1:8000",
-          "ws://localhost:42877/",
-        ],
-      },
-    },
-  })
-);
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Restrict to your frontend URL
-    credentials: true, // If using cookies/auth
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 // Root route for health check
