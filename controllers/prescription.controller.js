@@ -12,11 +12,21 @@ export const addPrescription = async (req, res, next) => {
       throw ApiError.BadRequest(errors.array()[0].msg, "VALIDATION_ERROR");
     }
 
-    const { patientEmail, listOfMedicine, instructions } = req.body;
+    const {
+      patientEmail,
+      diagnosis,
+      symptoms,
+      vitals,
+      listOfMedicine,
+      instructions,
+    } = req.body;
 
     // Create prescription
     const prescription = new Prescription({
       patientEmail,
+      diagnosis,
+      symptoms,
+      vitals,
       listOfMedicine,
       instructions,
       isDeleted: false,
@@ -80,7 +90,14 @@ export const updatePrescription = async (req, res, next) => {
     }
 
     const { id } = req.params;
-    const updates = req.body;
+    const {
+      patientEmail,
+      diagnosis,
+      symptoms,
+      vitals,
+      listOfMedicine,
+      instructions,
+    } = req.body;
 
     const prescription = await Prescription.findOne({
       _id: id,
@@ -94,14 +111,23 @@ export const updatePrescription = async (req, res, next) => {
     }
 
     // Update fields
-    if (updates.patientEmail) {
-      prescription.patientEmail = updates.patientEmail.toLowerCase();
+    if (patientEmail) {
+      prescription.patientEmail = patientEmail.toLowerCase();
     }
-    if (updates.listOfMedicine) {
-      prescription.listOfMedicine = updates.listOfMedicine;
+    if (diagnosis) {
+      prescription.diagnosis = diagnosis;
     }
-    if (updates.instructions !== undefined) {
-      prescription.instructions = updates.instructions;
+    if (symptoms) {
+      prescription.symptoms = symptoms;
+    }
+    if (vitals !== undefined) {
+      prescription.vitals = vitals;
+    }
+    if (listOfMedicine) {
+      prescription.listOfMedicine = listOfMedicine;
+    }
+    if (instructions !== undefined) {
+      prescription.instructions = instructions;
     }
 
     await prescription.save();

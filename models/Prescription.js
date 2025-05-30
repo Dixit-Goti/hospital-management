@@ -37,6 +37,34 @@ const medicineItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const vitalsSchema = new mongoose.Schema(
+  {
+    weight: {
+      type: Number,
+      min: [0, "Weight cannot be negative"],
+    },
+    height: {
+      type: Number,
+      min: [0, "Height cannot be negative"],
+    },
+    bloodPressure: {
+      type: String,
+    },
+    temperature: {
+      type: Number,
+    },
+    pulse: {
+      type: Number,
+      min: [0, "Pulse cannot be negative"],
+    },
+    respirationRate: {
+      type: Number,
+      min: [0, "Respiration rate cannot be negative"],
+    },
+  },
+  { _id: false }
+);
+
 const prescriptionSchema = new mongoose.Schema(
   {
     patientEmail: {
@@ -49,6 +77,16 @@ const prescriptionSchema = new mongoose.Schema(
         message: "Invalid patient email format",
       },
     },
+    diagnosis: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    symptoms: {
+      type: [String],
+      default: [],
+    },
+    vitals: vitalsSchema,
     listOfMedicine: {
       type: [medicineItemSchema],
       default: [],

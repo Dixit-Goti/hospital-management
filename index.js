@@ -14,8 +14,7 @@ const app = express();
 // Security middleware
 app.use(
   cors({
-    origin: "*",
-    credentials: true, // Allow all origins
+    origin: '*',
   })
 );
 app.use(express.json());
