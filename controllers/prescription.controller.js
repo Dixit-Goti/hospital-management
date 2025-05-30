@@ -52,7 +52,7 @@ export const getPrescriptions = async (req, res, next) => {
       throw ApiError.BadRequest(errors.array()[0].msg, "VALIDATION_ERROR");
     }
 
-    const { patientEmail } = req.query.email;
+    const { email } = req.query;
     const user = req.user;
 
     const query = { isDeleted: false };
@@ -63,9 +63,9 @@ export const getPrescriptions = async (req, res, next) => {
       if (!patient) {
         throw ApiError.NotFound("Patient not found", "PATIENT_NOT_FOUND");
       }
-      query.patientEmail = patient.email;
-    } else if (patientEmail) {
-      query.patientEmail = patientEmail.toLowerCase();
+      query.email = patient.email;
+    } else if (email) {
+      query.email = email.toLowerCase();
     }
 
     const prescriptions = await Prescription.find(query)
