@@ -28,7 +28,12 @@ dotenv.config();
 const app = express();
 
 // Security middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true, // Allow all origins
+  })
+);
 app.use(express.json());
 
 // Root route for health check
